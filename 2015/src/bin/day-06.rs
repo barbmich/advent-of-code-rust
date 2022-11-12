@@ -70,7 +70,7 @@ impl Actions<u16> for Operations {
 fn process_data<T: Clone + Copy>(
     input: &String,
     mut grid: Vec<Vec<T>>,
-    operations: impl Actions<T>,
+    operations: &impl Actions<T>,
 ) -> Vec<Vec<T>> {
     for instruction in input.lines() {
         let (action, from, to) = parse_command(instruction);
@@ -102,11 +102,10 @@ fn process_data<T: Clone + Copy>(
 
 fn main() {
     let input = read_to_string("input/day-6.input").unwrap();
+    let operations = Operations;
 
     let mut boolean_grid = vec![vec![false; 1000]; 1000];
-
-    let boolean_operations = Operations;
-    boolean_grid = process_data(&input, boolean_grid, boolean_operations);
+    boolean_grid = process_data(&input, boolean_grid, &operations);
 
     let flatten_grid: Vec<bool> = boolean_grid
         .iter()
@@ -122,9 +121,7 @@ fn main() {
     println!("number of lights on: {}", result.len());
 
     let mut intensity_grid = vec![vec![0; 1000]; 1000];
-
-    let integer_operations = Operations;
-    intensity_grid = process_data(&input, intensity_grid, integer_operations);
+    intensity_grid = process_data(&input, intensity_grid, &operations);
 
     let flatten_grid: Vec<u16> = intensity_grid
         .iter()
