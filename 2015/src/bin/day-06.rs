@@ -1,32 +1,77 @@
 use std::fs::read_to_string;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Command {
     On,
     Off,
     Toggle,
 }
 
-fn parse_command(instruction_string: &str) -> (Command, Vec<u32>, Vec<u32>) {
+fn coord_str_to_int_arr(value: &str) -> Vec<u16> {
+    value
+        .split(',')
+        .collect::<Vec<&str>>()
+        .iter()
+        .map(|x| x.parse::<u16>().unwrap())
+        .collect()
+}
+
+fn parse_command(instruction_string: &str) -> (Command, Vec<u16>, Vec<u16>) {
     let info_arr: Vec<&str> = instruction_string.rsplit(" ").collect();
-    let to: Vec<&str> = info_arr[0].split(',').collect();
-    let to_int: Vec<u32> = to.iter().map(|x| x.parse::<u32>().unwrap()).collect();
-    let from: Vec<&str> = info_arr[2].split(',').collect();
-    let from_int: Vec<u32> = from.iter().map(|x| x.parse::<u32>().unwrap()).collect();
-    let action = info_arr[3];
-    let action_enum = match action {
+
+    let to = coord_str_to_int_arr(info_arr[0]);
+    let from = coord_str_to_int_arr(info_arr[2]);
+    let action = match info_arr[3] {
         "on" => Command::On,
         "off" => Command::Off,
         "toggle" => Command::Toggle,
         _ => unreachable!("should not happen"),
     };
-    (action_enum, from_int, to_int)
+
+    (action, from, to)
 }
-fn main() {
-    let mut grid: [[bool; 1000]; 1000] = [[false; 1000]; 1000];
 
-    let input = read_to_string("input/day-6.input").unwrap();
+trait Actions<T> {
+    fn on_on(&self, old_value: &T) -> T;
+    fn on_off(&self, old_value: &T) -> T;
+    fn on_toggle(&self, old_value: &T) -> T;
+}
 
+struct Operations;
+
+impl Actions<bool> for Operations {
+    fn on_on(&self, _old_value: &bool) -> bool {
+        true
+    }
+    fn on_off(&self, _old_value: &bool) -> bool {
+        false
+    }
+    fn on_toggle(&self, old_value: &bool) -> bool {
+        !old_value
+    }
+}
+
+impl Actions<u16> for Operations {
+    fn on_on(&self, old_value: &u16) -> u16 {
+        old_value + 1
+    }
+    fn on_off(&self, old_value: &u16) -> u16 {
+        if old_value > &0 {
+            old_value - 1
+        } else {
+            0
+        }
+    }
+    fn on_toggle(&self, old_value: &u16) -> u16 {
+        old_value + 2
+    }
+}
+
+fn process_data<T: Clone + Copy>(
+    input: &String,
+    mut grid: Vec<Vec<T>>,
+    operations: impl Actions<T>,
+) -> Vec<Vec<T>> {
     for instruction in input.lines() {
         let (action, from, to) = parse_command(instruction);
         let mut new_grid = grid.clone();
@@ -36,15 +81,15 @@ fn main() {
                 let start_y = from[1];
                 let end_x = to[0];
                 let end_y = to[1];
-                if row_idx as u32 >= start_x
-                    && col_idx as u32 >= start_y
-                    && row_idx as u32 <= end_x
-                    && col_idx as u32 <= end_y
+                if row_idx as u16 >= start_x
+                    && col_idx as u16 >= start_y
+                    && row_idx as u16 <= end_x
+                    && col_idx as u16 <= end_y
                 {
                     match action {
-                        Command::On => new_grid[row_idx][col_idx] = true,
-                        Command::Off => new_grid[row_idx][col_idx] = false,
-                        Command::Toggle => new_grid[row_idx][col_idx] = !col,
+                        Command::On => new_grid[row_idx][col_idx] = operations.on_on(col),
+                        Command::Off => new_grid[row_idx][col_idx] = operations.on_off(col),
+                        Command::Toggle => new_grid[row_idx][col_idx] = operations.on_toggle(col),
                     };
                 }
             }
@@ -52,7 +97,18 @@ fn main() {
         grid = new_grid;
     }
 
-    let flatten_grid: Vec<bool> = grid
+    grid
+}
+
+fn main() {
+    let input = read_to_string("input/day-6.input").unwrap();
+
+    let mut boolean_grid = vec![vec![false; 1000]; 1000];
+
+    let boolean_operations = Operations;
+    boolean_grid = process_data(&input, boolean_grid, boolean_operations);
+
+    let flatten_grid: Vec<bool> = boolean_grid
         .iter()
         .flat_map(|array| array.iter())
         .cloned()
@@ -64,4 +120,24 @@ fn main() {
         .collect();
 
     println!("number of lights on: {}", result.len());
+
+    let mut intensity_grid = vec![vec![0; 1000]; 1000];
+
+    let integer_operations = Operations;
+    intensity_grid = process_data(&input, intensity_grid, integer_operations);
+
+    let flatten_grid: Vec<u16> = intensity_grid
+        .iter()
+        .flat_map(|array| array.iter())
+        .cloned()
+        .collect();
+
+    let filtered_grid: Vec<&u16> = flatten_grid
+        .iter()
+        .filter(|entry| **entry > 0)
+        .to_owned()
+        .collect();
+
+    let result: u32 = filtered_grid.iter().map(|x| u32::from(**x)).sum();
+    println!("intensity of lights on: {}", result);
 }
