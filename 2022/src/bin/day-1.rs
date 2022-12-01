@@ -1,35 +1,27 @@
-use std::{fs::read_to_string, vec};
+use std::fs::read_to_string;
 
 fn main() {
     let input = read_to_string("input/day-1.input").unwrap();
 
-    let mut highest_value = 0;
-    let mut current_elf = 0;
-    input.lines().for_each(|line| match line.parse::<i32>() {
-        Ok(value) => {
-            current_elf += value;
-        }
-        Err(..) => {
-            highest_value = if highest_value > current_elf {
-                highest_value
-            } else {
-                current_elf
-            };
-            current_elf = 0;
-        }
+    let str_vector: Vec<&str> = input.split("\n\n").collect();
+    let mut elves_vector: Vec<Vec<i32>> = vec![];
+    str_vector.iter().for_each(|elf| {
+        elves_vector.push(
+            elf.split("\n")
+                .map(|item| item.parse::<i32>().unwrap())
+                .collect(),
+        )
     });
 
-    println!("{}", highest_value);
+    let mut calories_vector: Vec<i32> = elves_vector.iter().map(|elf| elf.iter().sum()).collect();
 
-    // let array: Vec<&str> = input.split("\n\n").collect();
-    // let mut array_of_items: Vec<Vec<i32>> = vec![];
-    // array.iter().for_each(|elf| {
-    //     array_of_items.push(
-    //         elf.split("\n")
-    //             .map(|item| item.parse::<i32>().unwrap())
-    //             .collect(),
-    //     )
-    // });
-    // array_of_items.iter().map(f)
-    // println!("{:?}", array_of_items);
+    calories_vector.sort();
+    calories_vector.reverse();
+
+    println!("highest amount of calories carried: {}", calories_vector[0]);
+
+    println!(
+        "total of highest 3 amounts of calories carried: {}",
+        calories_vector.iter().take(3).sum::<i32>()
+    )
 }
