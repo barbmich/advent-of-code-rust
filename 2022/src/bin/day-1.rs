@@ -4,16 +4,14 @@ fn main() {
     let input = read_to_string("input/day-1.input").unwrap();
 
     let str_vector: Vec<&str> = input.split("\n\n").collect();
-    let mut elves_vector: Vec<Vec<i32>> = vec![];
+    let mut calories_vector: Vec<i32> = vec![];
     str_vector.iter().for_each(|elf| {
-        elves_vector.push(
+        calories_vector.push(
             elf.split("\n")
                 .map(|item| item.parse::<i32>().unwrap())
-                .collect(),
+                .sum(),
         )
     });
-
-    let mut calories_vector: Vec<i32> = elves_vector.iter().map(|elf| elf.iter().sum()).collect();
 
     calories_vector.sort();
     calories_vector.reverse();

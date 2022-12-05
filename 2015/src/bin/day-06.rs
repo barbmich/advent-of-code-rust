@@ -1,5 +1,4 @@
 use std::fs::read_to_string;
-
 #[derive(Debug, Clone)]
 enum Command {
     On,
@@ -17,7 +16,7 @@ fn coord_str_to_int_arr(value: &str) -> Vec<u16> {
 }
 
 fn parse_command(instruction_string: &str) -> (Command, Vec<u16>, Vec<u16>) {
-    let info_arr: Vec<&str> = instruction_string.rsplit(" ").collect();
+    let info_arr: Vec<&str> = instruction_string.rsplit(' ').collect();
 
     let to = coord_str_to_int_arr(info_arr[0]);
     let from = coord_str_to_int_arr(info_arr[2]);
@@ -68,7 +67,7 @@ impl Actions<u16> for Operations {
 }
 
 fn process_data<T: Clone + Copy>(
-    input: &String,
+    input: &str,
     mut grid: Vec<Vec<T>>,
     operations: &impl Actions<T>,
 ) -> Vec<Vec<T>> {
@@ -113,12 +112,9 @@ fn main() {
         .cloned()
         .collect();
 
-    let result: Vec<&bool> = flatten_grid
-        .iter()
-        .filter(|entry| entry == &&true)
-        .collect();
+    let result = flatten_grid.iter().filter(|entry| entry == &&true).count();
 
-    println!("number of lights on: {}", result.len());
+    println!("number of lights on: {}", result);
 
     let mut intensity_grid = vec![vec![0; 1000]; 1000];
     intensity_grid = process_data(&input, intensity_grid, &operations);
