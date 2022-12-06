@@ -130,7 +130,7 @@ fn main() {
     let mut games_pt_1: Vec<Game> = vec![];
 
     for line in input.lines() {
-        let vector: Vec<&str> = line.split(" ").collect();
+        let vector: Vec<&str> = line.split(' ').collect();
         games_pt_1.push(Game::part_1(vector[0], vector[1]));
     }
 
@@ -140,7 +140,7 @@ fn main() {
 
     let mut games_pt_2: Vec<Game> = vec![];
     for line in input.lines() {
-        let vector: Vec<&str> = line.split(" ").collect();
+        let vector: Vec<&str> = line.split(' ').collect();
         games_pt_2.push(Game::part_2(vector[0], vector[1]));
     }
 

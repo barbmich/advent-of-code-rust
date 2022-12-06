@@ -7,7 +7,7 @@ fn main() {
     let mut calories_vector: Vec<i32> = vec![];
     str_vector.iter().for_each(|elf| {
         calories_vector.push(
-            elf.split("\n")
+            elf.split('\n')
                 .map(|item| item.parse::<i32>().unwrap())
                 .sum(),
         )
@@ -21,5 +21,8 @@ fn main() {
     println!(
         "total of highest 3 amounts of calories carried: {}",
         calories_vector.iter().take(3).sum::<i32>()
-    )
+    );
+
+    let test = '\n';
+    println!("{:?}", test.to_string().as_bytes());
 }

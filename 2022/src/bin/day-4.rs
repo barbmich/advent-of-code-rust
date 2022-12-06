@@ -60,7 +60,7 @@ fn main() {
             || (sections.team_1.from <= sections.team_2.to
                 && sections.team_1.to >= sections.team_2.from)
         {
-            part_2 = part_2 + 1
+            part_2 += 1
         }
     }
     println!(
