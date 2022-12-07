@@ -6,8 +6,8 @@ struct Move {
     from: usize,
     to: usize,
 }
-fn get_stacks() -> [Vec<char>; 9] {
-    return [
+fn get_stacks() -> Vec<Vec<char>> {
+    vec![
         vec!['N', 'R', 'G', 'P'],
         vec!['J', 'T', 'B', 'L', 'F', 'G', 'D', 'C'],
         vec!['M', 'S', 'V'],
@@ -17,7 +17,7 @@ fn get_stacks() -> [Vec<char>; 9] {
         vec!['H', 'D', 'G', 'W', 'P'],
         vec!['Z', 'L', 'P', 'H', 'S', 'C', 'M', 'V'],
         vec!['R', 'P', 'F', 'L', 'W', 'G', 'Z'],
-    ];
+    ]
 }
 
 fn main() {
@@ -40,26 +40,39 @@ fn main() {
     let mut part_1_stacks = get_stacks();
 
     for m in moves.iter() {
-        for _ in 0..m.qty {
-            let s = part_1_stacks[m.from - 1].pop();
-            part_1_stacks[m.to - 1].push(s.unwrap());
-        }
+        let final_length = part_1_stacks[m.from - 1].len().saturating_sub(m.qty);
+        let tail = part_1_stacks[m.from - 1].split_off(final_length);
+        part_1_stacks[m.to - 1].extend(tail);
     }
 
-    let mut part_1 = String::new();
-    for stack in part_1_stacks.iter_mut() {
-        part_1.push(stack.pop().unwrap());
-    }
+    let part_1 = part_1_stacks
+        .iter()
+        .map(|stack| stack.last().unwrap().to_string())
+        .collect::<Vec<String>>()
+        .join("");
 
-    println!("the list of crates on top of the stacks is: {}", part_1);
+    println!(
+        "part 1 - the list of crates on top at the end is: {}",
+        part_1
+    );
 
     let mut part_2_stacks = get_stacks();
 
     for m in moves.iter() {
-        let (remaining_crates, moving_crates) =
-            part_2_stacks[m.from - 1].split_at(part_2_stacks[m.from - 1].len() - m.qty);
-        let moved_crates = moving_crates.clone();
-        part_2_stacks[m.from - 1] = remaining_crates.to_vec();
-        part_2_stacks[m.to - 1].append(&mut moved_crates.to_vec());
+        let final_length = part_2_stacks[m.from - 1].len().saturating_sub(m.qty);
+        let mut tail = part_2_stacks[m.from - 1].split_off(final_length);
+        tail.reverse();
+        part_2_stacks[m.to - 1].extend(tail);
     }
+
+    let part_2 = part_2_stacks
+        .iter()
+        .map(|stack| stack.last().unwrap().to_string())
+        .collect::<Vec<String>>()
+        .join("");
+
+    println!(
+        "part 2 - the list of crates on top at the end is: {}",
+        part_2
+    );
 }
